@@ -5,7 +5,7 @@
 ;; Copyright (C) 2009-2010 Toby Cubitt
 
 ;; Author: Toby Cubitt <toby-undo-tree@dr-qubit.org>
-;; Version: 0.3
+;; Version: 0.3.1
 ;; Keywords: undo, redo, history, tree
 ;; URL: http://www.dr-qubit.org/emacs.php
 ;; Git Repository: http://www.dr-qubit.org/git/undo-tree.git
@@ -605,6 +605,9 @@
 
 
 ;;; Change Log:
+;;
+;; Version 0.3.1
+;; * use color for the node timestamp when viewing in timestamp mode.
 ;;
 ;; Version 0.3
 ;; * implemented undo-in-region
