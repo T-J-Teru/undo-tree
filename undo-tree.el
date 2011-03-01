@@ -2608,44 +2608,66 @@ Argument is a character, naming the register."
       (setq stack (append stack node)))))
 
 
+;; APB: Modified this to add colour support in timestamp mode.
 (defun undo-tree-draw-node (node &optional current)
   ;; Draw symbol representing NODE in visualizer.
   (goto-char (undo-tree-node-marker node))
-  ;; if displaying timestamps, represent node by timestamp
-  (if undo-tree-visualizer-timestamps
-      (progn
-        (backward-char 4)
-        (if current (undo-tree-insert ?*) (undo-tree-insert ? ))
-        (undo-tree-insert
-         (undo-tree-timestamp-to-string (undo-tree-node-timestamp node)))
-        (backward-char 5)
-        (move-marker (undo-tree-node-marker node) (point))
-        (put-text-property (- (point) 3) (+ (point) 5)
-                           'undo-tree-node node))
-    ;; represent node by differentl symbols, depending on whether it's the
-    ;; current node or is saved in a register
-    (let ((register (undo-tree-node-register node)))
-      (cond
-       (current
-	(let ((undo-tree-insert-face
-	       (cons 'undo-tree-visualizer-current-face
-		     (and (boundp 'undo-tree-insert-face)
-			  (or (and (consp undo-tree-insert-face)
-				   undo-tree-insert-face)
-			      (list undo-tree-insert-face))))))
-	  (undo-tree-insert ?x)))
-       ((and register (eq node (get-register register)))
-	(let ((undo-tree-insert-face
-	       (cons 'undo-tree-visualizer-register-face
-		     (and (boundp 'undo-tree-insert-face)
-			  (or (and (consp undo-tree-insert-face)
-				   undo-tree-insert-face)
-			      (list undo-tree-insert-face))))))
-	  (undo-tree-insert register)))
-       (t (undo-tree-insert ?o))))
-    (backward-char 1)
-    (put-text-property (point) (1+ (point)) 'undo-tree-node node)))
 
+  ;; represent node by differentl symbols, depending on whether it's the
+  ;; current node or is saved in a register
+  (let ((register (undo-tree-node-register node)))
+
+    ;; if displaying timestamps, represent node by timestamp
+    (if undo-tree-visualizer-timestamps
+        (progn
+          (backward-char 4)
+          (if current (undo-tree-insert ?*) (undo-tree-insert ? ))
+          (let ((node-timestamp-string (undo-tree-timestamp-to-string (undo-tree-node-timestamp node))))
+            (cond
+             (current
+              (let ((undo-tree-insert-face
+                     (cons 'undo-tree-visualizer-current-face
+                           (and (boundp 'undo-tree-insert-face)
+                                (or (and (consp undo-tree-insert-face)
+                                         undo-tree-insert-face)
+                                    (list undo-tree-insert-face))))))
+                (undo-tree-insert node-timestamp-string)))
+             ((and register (eq node (get-register register)))
+              (let ((undo-tree-insert-face
+                     (cons 'undo-tree-visualizer-register-face
+                           (and (boundp 'undo-tree-insert-face)
+                                (or (and (consp undo-tree-insert-face)
+                                         undo-tree-insert-face)
+                                    (list undo-tree-insert-face))))))
+                (undo-tree-insert node-timestamp-string)))
+             (t (undo-tree-insert node-timestamp-string))))
+          (backward-char 5)
+          (move-marker (undo-tree-node-marker node) (point))
+          (put-text-property (- (point) 3) (+ (point) 5)
+                             'undo-tree-node node))
+
+      ;; otherwise use characters to represent each node
+      (progn
+        (cond
+         (current
+          (let ((undo-tree-insert-face
+                 (cons 'undo-tree-visualizer-current-face
+                       (and (boundp 'undo-tree-insert-face)
+                            (or (and (consp undo-tree-insert-face)
+                                     undo-tree-insert-face)
+                                (list undo-tree-insert-face))))))
+            (undo-tree-insert ?x)))
+         ((and register (eq node (get-register register)))
+          (let ((undo-tree-insert-face
+                 (cons 'undo-tree-visualizer-register-face
+                       (and (boundp 'undo-tree-insert-face)
+			  (or (and (consp undo-tree-insert-face)
+				   undo-tree-insert-face)
+			      (list undo-tree-insert-face))))))
+            (undo-tree-insert register)))
+         (t (undo-tree-insert ?o)))
+        (backward-char 1)
+        (put-text-property (point) (1+ (point)) 'undo-tree-node node)))))
 
 (defun undo-tree-draw-subtree (node &optional active-branch)
   ;; Draw subtree rooted at NODE. The subtree will start from point.
